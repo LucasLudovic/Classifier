@@ -8,6 +8,8 @@ from typing import List, Tuple
 from PIL import Image
 from torchvision import transforms
 
+from data_transforms import build_eval_transform
+
 
 IMAGE_SUFFIXES: Tuple[str, ...] = (".jpg", ".jpeg", ".png")
 
@@ -37,9 +39,7 @@ class Predictor:
         # ImageFolder attribue les indices par ordre alphabetique des dossiers,
         # on trie donc les classes pour retrouver le meme mapping.
         self._classes: List[str] = sorted(output_classes)
-        self._transform: transforms.Compose = transforms.Compose(
-            [transforms.Resize(img_size), transforms.ToTensor()]
-        )
+        self._transform: transforms.Compose = build_eval_transform(img_size)
 
     @torch.no_grad()
     def predict(self, source: Path) -> List[Prediction]:

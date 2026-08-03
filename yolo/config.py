@@ -14,7 +14,9 @@ class HyperParameters:
     optimizer: str = "SGD"
 
     dataset_dir: Path = Path("data")
-    output_classes: list[str] = field(default_factory=lambda: ["none", "electrode"])
+    output_classes: list[str] = field(
+        default_factory=lambda: ["none", "electrode", "both"]
+    )
 
     project_dir: Path = Path("runs/classify/runs")
     run_name: str = "electrode-cls"
@@ -31,5 +33,5 @@ class HyperParameters:
 @dataclass
 class InferenceParameters:
     weights: Path = HyperParameters().best_weights
-    source: Path = Path("data/test/electrode")
+    source: Path = Path("data/test/both")
     img_size: int = HyperParameters.img_size

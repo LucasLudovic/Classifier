@@ -16,7 +16,13 @@ class Metrics:
 
 
 class Trainer:
-    def __init__(self, model: nn.Module, learning_rate: float, device: torch.device):
+    def __init__(
+        self,
+        model: nn.Module,
+        learning_rate: float,
+        device: torch.device,
+        save_dir: Path,
+    ):
         self._model: nn.Module = model
         self._device: torch.device = device
         self._criterion: nn.Module = nn.CrossEntropyLoss()
@@ -26,10 +32,13 @@ class Trainer:
         self._optimizer: torch.optim.Optimizer = torch.optim.AdamW(
             params=model.parameters(), lr=learning_rate
         )
+        self.save_dir: Path = save_dir
 
     @torch.enable_grad()
     def fit(self, train_loader: DataLoader, val_loader: DataLoader, nb_epochs: int):
+        best_val: float = float("inf")
         for epoch in range(nb_epochs):
+            save: bool = False
             current_batch: int = 0
             running_loss: float = 0.0
             correct: int = 0
@@ -58,15 +67,20 @@ class Trainer:
                 loss=running_loss / current_batch, accuracy=correct / total
             )
             val_metrics: Metrics = self._validate(val_loader)
+            if val_metrics.loss < best_val:
+                best_val = val_metrics.loss
+                self.save()
+                save = True
 
             print(
-                f"Epoch {epoch}/{nb_epochs} --- train: {train_metrics} --- val: {val_metrics}"
+                f"Epoch {epoch}/{nb_epochs} --- train: {train_metrics} --- val: {val_metrics} {"<--" if save else ""}"
             )
+            save = False
 
-    def save(self, path: Path) -> None:
+    def save(self) -> None:
         """Sauvegarde les poids pour l'inference."""
-        path.parent.mkdir(parents=True, exist_ok=True)
-        torch.save(self._model.state_dict(), path)
+        self.save_dir.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(self._model.state_dict(), self.save_dir)
 
     @torch.no_grad()
     def _validate(self, val_loader: DataLoader) -> Metrics:

@@ -5,6 +5,7 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 from config import HyperParameters
+from data_transforms import build_eval_transform, build_train_transform
 from model.factory import build_model
 from model.model import Model
 from training.train import Trainer
@@ -15,13 +16,8 @@ def main():
     print(f"Device: {device}")
     params: HyperParameters = HyperParameters()
 
-    train_transform: transforms.Compose = transforms.Compose(
-        [transforms.Resize(params.img_size), transforms.ToTensor()]
-    )
-
-    val_transform: transforms.Compose = transforms.Compose(
-        [transforms.Resize(params.img_size), transforms.ToTensor()]
-    )
+    train_transform: transforms.Compose = build_train_transform(params.img_size)
+    val_transform: transforms.Compose = build_eval_transform(params.img_size)
 
     train_dataset = ImageFolder(root=params.train_dir, transform=train_transform)
     val_dataset = ImageFolder(root=params.val_dir, transform=val_transform)
@@ -43,7 +39,10 @@ def main():
     model.to(device)
 
     trainer: Trainer = Trainer(
-        model=model, learning_rate=params.learning_rate, device=device
+        model=model,
+        learning_rate=params.learning_rate,
+        device=device,
+        save_dir=params.checkpoint,
     )
 
     trainer.fit(
@@ -51,9 +50,6 @@ def main():
         val_loader=val_loader,
         nb_epochs=params.epochs,
     )
-
-    trainer.save(params.checkpoint)
-    print(f"Poids sauvegardes: {params.checkpoint}")
 
 
 if __name__ == "__main__":
