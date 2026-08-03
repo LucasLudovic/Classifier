@@ -20,12 +20,15 @@ class ConvLayer(nn.Module):
             out_channels=out_channels,
             kernel_size=conv_kernel_size,
             stride=stride,
+            bias=False,
         )
+        self._norm = nn.BatchNorm2d(out_channels)
         self._relu = nn.ReLU()
         self._pooling = nn.MaxPool2d(kernel_size=pool_kernel_size)
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         conv: torch.Tensor = self._conv(input)
-        rectified: torch.Tensor = self._relu(conv)
+        norm: torch.Tensor = self._norm(conv)
+        rectified: torch.Tensor = self._relu(norm)
         activated: torch.Tensor = self._pooling(rectified)
         return activated

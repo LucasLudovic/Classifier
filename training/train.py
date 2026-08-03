@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from dataclasses import dataclass
+from pathlib import Path
 from torch.utils.data import DataLoader
 
 
@@ -19,19 +20,22 @@ class Trainer:
         self._model: nn.Module = model
         self._device: torch.device = device
         self._criterion: nn.Module = nn.CrossEntropyLoss()
-        self._optimizer: torch.optim.Optimizer = torch.optim.SGD(
-            model.parameters(), lr=learning_rate
+        # self._optimizer: torch.optim.Optimizer = torch.optim.SGD(
+        #     model.parameters(), lr=learning_rate, momentum=0.9
+        # )
+        self._optimizer: torch.optim.Optimizer = torch.optim.AdamW(
+            params=model.parameters(), lr=learning_rate
         )
 
     @torch.enable_grad()
     def fit(self, train_loader: DataLoader, val_loader: DataLoader, nb_epochs: int):
-        self._model.train()
         for epoch in range(nb_epochs):
             current_batch: int = 0
             running_loss: float = 0.0
             correct: int = 0
             total: int = 0
 
+            self._model.train()
             for index, data in enumerate(train_loader):
                 inputs, labels = data
                 inputs = inputs.to(self._device)
@@ -59,6 +63,11 @@ class Trainer:
                 f"Epoch {epoch}/{nb_epochs} --- train: {train_metrics} --- val: {val_metrics}"
             )
 
+    def save(self, path: Path) -> None:
+        """Sauvegarde les poids pour l'inference."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(self._model.state_dict(), path)
+
     @torch.no_grad()
     def _validate(self, val_loader: DataLoader) -> Metrics:
         current_batch: int = 0
@@ -66,6 +75,7 @@ class Trainer:
         correct: int = 0
         total: int = 0
 
+        self._model.eval()
         for index, data in enumerate(val_loader):
             inputs, labels = data
             inputs = inputs.to(self._device)

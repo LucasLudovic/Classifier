@@ -16,7 +16,7 @@ class HyperParameters:
     dataset_dir: Path = Path("data")
     output_classes: list[str] = field(default_factory=lambda: ["none", "electrode"])
 
-    project_dir: Path = Path("runs")
+    project_dir: Path = Path("runs/classify/runs")
     run_name: str = "electrode-cls"
 
     @property
@@ -31,5 +31,5 @@ class HyperParameters:
 @dataclass
 class InferenceParameters:
     weights: Path = HyperParameters().best_weights
-    source: Path = Path("data/test")
+    source: Path = Path("data/test/electrode")
     img_size: int = HyperParameters.img_size

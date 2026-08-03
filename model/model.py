@@ -36,7 +36,7 @@ class Model(nn.Module):
             ]
         )
 
-        self._pool = nn.AdaptiveAvgPool2d(output_size=1)
+        self._pool = nn.AdaptiveMaxPool2d(output_size=1)
         self._flatten = nn.Flatten()
         self._fully_connected = nn.Linear(
             in_features=out_channels[-1], out_features=self._nb_classes
