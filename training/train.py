@@ -1,13 +1,23 @@
 import torch
 import torch.nn as nn
 
+from dataclasses import dataclass
 from torch.utils.data import DataLoader
 
 
+@dataclass(frozen=True)
+class Metrics:
+    loss: float
+    accuracy: float
+
+    def __str__(self) -> str:
+        return f"loss: {self.loss:.4f}, accuracy: {self.accuracy:.2%}"
+
+
 class Trainer:
-    def __init__(self, model: nn.Module, learning_rate: float, device: torch.Device):
+    def __init__(self, model: nn.Module, learning_rate: float, device: torch.device):
         self._model: nn.Module = model
-        self._device: torch.Device = device
+        self._device: torch.device = device
         self._criterion: nn.Module = nn.CrossEntropyLoss()
         self._optimizer: torch.optim.Optimizer = torch.optim.SGD(
             model.parameters(), lr=learning_rate
@@ -19,9 +29,14 @@ class Trainer:
         for epoch in range(nb_epochs):
             current_batch: int = 0
             running_loss: float = 0.0
+            correct: int = 0
+            total: int = 0
 
             for index, data in enumerate(train_loader):
                 inputs, labels = data
+                inputs = inputs.to(self._device)
+                labels = labels.to(self._device)
+
                 self._optimizer.zero_grad()
 
                 logits: torch.Tensor = self._model(inputs)
@@ -32,17 +47,24 @@ class Trainer:
 
                 current_batch = index + 1
                 running_loss += loss.item()
+                correct += int((logits.argmax(dim=1) == labels).sum().item())
+                total += labels.size(0)
 
-            running_loss = running_loss / current_batch
-            val_loss = self._validate(val_loader)
+            train_metrics: Metrics = Metrics(
+                loss=running_loss / current_batch, accuracy=correct / total
+            )
+            val_metrics: Metrics = self._validate(val_loader)
+
             print(
-                f"Epoch {epoch}/{nb_epochs} --- {self._criterion._get_name()}: train: {running_loss}, val: {val_loss}"
+                f"Epoch {epoch}/{nb_epochs} --- train: {train_metrics} --- val: {val_metrics}"
             )
 
     @torch.no_grad()
-    def _validate(self, val_loader: DataLoader) -> float:
+    def _validate(self, val_loader: DataLoader) -> Metrics:
         current_batch: int = 0
         running_loss: float = 0.0
+        correct: int = 0
+        total: int = 0
 
         for index, data in enumerate(val_loader):
             inputs, labels = data
@@ -54,5 +76,7 @@ class Trainer:
 
             current_batch = index + 1
             running_loss += loss.item()
+            correct += int((logits.argmax(dim=1) == labels).sum().item())
+            total += labels.size(0)
 
-        return running_loss / current_batch
+        return Metrics(loss=running_loss / current_batch, accuracy=correct / total)

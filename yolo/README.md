@@ -6,6 +6,8 @@ checkpointing : le `Trainer` n'est qu'une facade au-dessus.
 
 ## Installation
 
+Python 3.10+ (syntaxe `X | Y` des annotations, PEP 604).
+
 ```bash
 pip install -r yolo/requirements.txt
 ```
@@ -26,19 +28,19 @@ l'entrainement, `InferenceParameters` (poids, source) pour l'inference.
 ## Format du dataset
 
 Un dossier par split, un sous-dossier par classe. Pas de fichier de labels :
-le nom du dossier *est* le label.
+le nom du dossier _est_ le label.
 
 ```
 data/
 ├── train/
 │   ├── none/       *.jpg
-│   └── electrod/   *.jpg
+│   └── electrode/   *.jpg
 ├── val/
 │   ├── none/
-│   └── electrod/
+│   └── electrode/
 └── test/           (optionnel)
     ├── none/
-    └── electrod/
+    └── electrode/
 ```
 
 Sur Roboflow : projet de type **Single-Label Classification**, export en

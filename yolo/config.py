@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
 
 
 @dataclass
@@ -8,17 +7,17 @@ class HyperParameters:
     epochs: int = 50
     batch_size: int = 4
     learning_rate: float = 0.01
-    img_size: int = 640
+    img_size: int = 800
 
     # n / s / m / l / x : du plus rapide au plus precis
     pretrained_weights: str = "yolo26n-cls.pt"
     optimizer: str = "SGD"
 
     dataset_dir: Path = Path("data")
-    output_classes: List[str] = field(default_factory=lambda: ["none", "electrod"])
+    output_classes: list[str] = field(default_factory=lambda: ["none", "electrode"])
 
     project_dir: Path = Path("runs")
-    run_name: str = "electrod-cls"
+    run_name: str = "electrode-cls"
 
     @property
     def run_dir(self) -> Path:

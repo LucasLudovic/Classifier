@@ -1,22 +1,22 @@
 from pathlib import Path
-from typing import Dict, FrozenSet, List, Tuple
+from typing import TypeAlias
 
-IMAGE_SUFFIXES: FrozenSet[str] = frozenset({".jpg", ".jpeg", ".png", ".bmp", ".webp"})
+IMAGE_SUFFIXES: frozenset[str] = frozenset({".jpg", ".jpeg", ".png", ".bmp", ".webp"})
 
 # Roboflow exporte le split de validation sous le nom "valid",
 # Ultralytics attend "val".
-ROBOFLOW_SPLITS: Dict[str, str] = {"valid": "val", "validation": "val"}
+ROBOFLOW_SPLITS: dict[str, str] = {"valid": "val", "validation": "val"}
 
 # {split: {classe: nombre d'images}}
-Counts = Dict[str, Dict[str, int]]
+Counts: TypeAlias = dict[str, dict[str, int]]
 
 
-def normalize_roboflow_export(dataset_dir: Path) -> List[Tuple[str, str]]:
+def normalize_roboflow_export(dataset_dir: Path) -> list[tuple[str, str]]:
     """Renomme les splits d'un export Roboflow vers les noms attendus par YOLO.
 
     Retourne les renommages effectues, sous forme de couples (avant, apres).
     """
-    renamed: List[Tuple[str, str]] = []
+    renamed: list[tuple[str, str]] = []
 
     for source_name, target_name in ROBOFLOW_SPLITS.items():
         source: Path = dataset_dir / source_name
@@ -46,17 +46,17 @@ def count_images(dataset_dir: Path) -> Counts:
     }
 
 
-def check(dataset_dir: Path, expected_classes: List[str]) -> Counts:
+def check(dataset_dir: Path, expected_classes: list[str]) -> Counts:
     """Verifie les splits et la coherence des classes, retourne les comptes."""
     for split in ("train", "val"):
         if not (dataset_dir / split).is_dir():
             raise FileNotFoundError(f"Split manquant: {dataset_dir / split}")
 
     counts: Counts = count_images(dataset_dir)
-    expected: List[str] = sorted(expected_classes)
+    expected: list[str] = sorted(expected_classes)
 
     for split, classes in counts.items():
-        found: List[str] = sorted(classes)
+        found: list[str] = sorted(classes)
         if found != expected:
             raise ValueError(
                 f"Classes inattendues dans {split}/: {found} != {expected}"

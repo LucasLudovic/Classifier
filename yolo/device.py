@@ -1,9 +1,9 @@
 import torch
 
-from typing import Union
+from typing import TypeAlias
 
 # Index de GPU ou nom de peripherique, au format attendu par Ultralytics.
-Device = Union[int, str]
+Device: TypeAlias = int | str
 
 
 def resolve_device() -> Device:

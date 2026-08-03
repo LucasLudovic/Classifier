@@ -1,5 +1,3 @@
-from typing import List
-
 from yolo.config import InferenceParameters
 from yolo.device import Device, resolve_device
 from yolo.model.classifier import Classifier, Prediction
@@ -11,7 +9,7 @@ def main() -> int:
 
     model: Classifier = Classifier(weights=params.weights)
 
-    predictions: List[Prediction] = model.predict(
+    predictions: list[Prediction] = model.predict(
         source=params.source, img_size=params.img_size, device=device
     )
 

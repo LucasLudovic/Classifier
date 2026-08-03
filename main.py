@@ -16,16 +16,16 @@ from training.train import Trainer
 class HyperParameters:
     epochs: int = 50
     batch_size: int = 4
-    learning_rate: float = 0.01
+    learning_rate: float = 0.1
     conv_kernel_size: int = 3
     stride_kernel_size: int = 2
 
-    img_size: Tuple[int, int] = (800, 600)
+    img_size: Tuple[int, int] = (800, 800)
 
     conv_in_channels: int = 3
     conv_out_channels: List[int] = field(default_factory=lambda: [32, 64, 128])
 
-    output_classes: List[str] = field(default_factory=lambda: ["none", "electrod"])
+    output_classes: List[str] = field(default_factory=lambda: ["none", "electrode"])
 
 
 def main():
