@@ -1,5 +1,5 @@
-from config import HyperParameters
-from model.model import Model
+from custom.config import HyperParameters
+from custom.model.model import Model
 
 
 def build_model(params: HyperParameters) -> Model:

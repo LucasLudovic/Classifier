@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from typing import List, Tuple
 
-from model.cnn import ConvLayer
+from custom.model.cnn import ConvLayer
 
 
 class Model(nn.Module):

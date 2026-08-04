@@ -1,4 +1,6 @@
-from yolo.config import InferenceParameters
+from pathlib import Path
+
+from yolo.config import HyperParameters, InferenceParameters
 from yolo.device import Device, resolve_device
 from yolo.model.classifier import Classifier, Prediction
 
@@ -7,7 +9,15 @@ def main() -> int:
     params: InferenceParameters = InferenceParameters()
     device: Device = resolve_device()
 
-    model: Classifier = Classifier(weights=params.weights)
+    weights: Path | None = params.resolve_weights()
+    if weights is None or not weights.exists():
+        project_dir: Path = HyperParameters().project_dir
+        print(f"Poids introuvables dans {project_dir}/ (lancer yolo/train.py d'abord)")
+        return 1
+
+    print(f"Poids: {weights}")
+
+    model: Classifier = Classifier(weights=weights)
 
     predictions: list[Prediction] = model.predict(
         source=params.source, img_size=params.img_size, device=device

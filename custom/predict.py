@@ -1,9 +1,11 @@
 import torch
 
-from config import HyperParameters, InferenceParameters
-from inference.predictor import Prediction, Predictor
-from model.factory import build_model
-from model.model import Model
+from pathlib import Path
+
+from custom.config import HyperParameters, InferenceParameters
+from custom.inference.predictor import Prediction, Predictor
+from custom.model.factory import build_model
+from custom.model.model import Model
 
 
 def main() -> int:
@@ -13,12 +15,18 @@ def main() -> int:
     params: HyperParameters = HyperParameters()
     inference: InferenceParameters = InferenceParameters()
 
-    if not inference.weights.exists():
-        print(f"Poids introuvables: {inference.weights} (lancer main.py d'abord)")
+    weights: Path | None = inference.resolve_weights()
+    if weights is None or not weights.exists():
+        print(
+            f"Poids introuvables dans {params.project_dir}/ "
+            "(lancer custom/train.py d'abord)"
+        )
         return 1
 
+    print(f"Poids: {weights}")
+
     model: Model = build_model(params)
-    model.load_state_dict(torch.load(inference.weights, map_location=device))
+    model.load_state_dict(torch.load(weights, map_location=device))
 
     predictor: Predictor = Predictor(
         model=model,

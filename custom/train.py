@@ -1,14 +1,16 @@
 import torch
 
+from pathlib import Path
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-from config import HyperParameters
-from data_transforms import build_eval_transform, build_train_transform
-from model.factory import build_model
-from model.model import Model
-from training.train import Trainer
+from custom.config import HyperParameters
+from custom.data_transforms import build_eval_transform, build_train_transform
+from custom.model.factory import build_model
+from custom.model.model import Model
+from custom.training.train import Trainer
+from run_directory import next_run_dir
 
 
 def main():
@@ -38,11 +40,14 @@ def main():
     model: Model = build_model(params)
     model.to(device)
 
+    run_dir: Path = next_run_dir(params.project_dir, params.run_name)
+    print(f"Run: {run_dir}")
+
     trainer: Trainer = Trainer(
         model=model,
         learning_rate=params.learning_rate,
         device=device,
-        save_dir=params.checkpoint,
+        run_dir=run_dir,
     )
 
     trainer.fit(
@@ -50,6 +55,8 @@ def main():
         val_loader=val_loader,
         nb_epochs=params.epochs,
     )
+
+    print(f"Poids: {trainer.weights}")
 
 
 if __name__ == "__main__":

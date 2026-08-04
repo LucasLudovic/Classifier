@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from run_directory import best_weights
 from yolo import dataset
 from yolo.config import HyperParameters
 from yolo.device import Device, resolve_device
@@ -23,7 +24,8 @@ def main() -> int:
     trainer: Trainer = Trainer(model=model, params=params, device=device)
 
     run_dir: Path = trainer.fit()
-    print(f"Poids: {run_dir / 'weights' / 'best.pt'}")
+    print(f"Run: {run_dir}")
+    print(f"Poids: {best_weights(run_dir)}")
 
     if (params.dataset_dir / "test").is_dir():
         metrics: Metrics = trainer.validate(split="test")

@@ -8,7 +8,7 @@ from typing import List, Tuple
 from PIL import Image
 from torchvision import transforms
 
-from data_transforms import build_eval_transform
+from custom.data_transforms import build_eval_transform
 
 
 IMAGE_SUFFIXES: Tuple[str, ...] = (".jpg", ".jpeg", ".png")

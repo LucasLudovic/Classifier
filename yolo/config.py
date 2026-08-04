@@ -1,13 +1,16 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from run_directory import latest_weights
+
 
 @dataclass
 class HyperParameters:
-    epochs: int = 50
-    batch_size: int = 4
+    epochs: int = 100
+    batch_size: int = 16
     learning_rate: float = 0.01
-    img_size: int = 800
+    img_size: int = 400
+    seed: int = 42
 
     # n / s / m / l / x : du plus rapide au plus precis
     pretrained_weights: str = "yolo26n-cls.pt"
@@ -18,20 +21,22 @@ class HyperParameters:
         default_factory=lambda: ["none", "electrode", "both"]
     )
 
-    project_dir: Path = Path("runs/classify/runs")
+    project_dir: Path = Path("runs/classify")
     run_name: str = "electrode-cls"
-
-    @property
-    def run_dir(self) -> Path:
-        return self.project_dir / self.run_name
-
-    @property
-    def best_weights(self) -> Path:
-        return self.run_dir / "weights" / "best.pt"
 
 
 @dataclass
 class InferenceParameters:
-    weights: Path = HyperParameters().best_weights
-    source: Path = Path("data/test/both")
+    source: Path = Path("serie_x/valide/electrode")
     img_size: int = HyperParameters.img_size
+    # None -> les poids du dernier entrainement
+    weights: Path | None = None
+
+    def resolve_weights(self) -> Path | None:
+        """Poids demandes, sinon meilleurs poids du run le plus recent."""
+        if self.weights is not None:
+            return self.weights
+
+        params: HyperParameters = HyperParameters()
+
+        return latest_weights(params.project_dir, params.run_name)

@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Tuple
 
+from run_directory import latest_weights
+
 
 @dataclass
 class HyperParameters:
@@ -23,10 +25,21 @@ class HyperParameters:
     train_dir: Path = Path("data/train")
     val_dir: Path = Path("data/val")
 
-    checkpoint: Path = Path("runs/classify/model.pt")
+    project_dir: Path = Path("runs/custom")
+    run_name: str = "train"
 
 
 @dataclass
 class InferenceParameters:
-    weights: Path = HyperParameters().checkpoint
     source: Path = Path("data/test/both")
+    # None -> les poids du dernier entrainement
+    weights: Path | None = None
+
+    def resolve_weights(self) -> Path | None:
+        """Poids demandes, sinon meilleurs poids du run le plus recent."""
+        if self.weights is not None:
+            return self.weights
+
+        params: HyperParameters = HyperParameters()
+
+        return latest_weights(params.project_dir, params.run_name)

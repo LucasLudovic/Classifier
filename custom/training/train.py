@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from torch.utils.data import DataLoader
 
+from run_directory import best_weights
+
 
 @dataclass(frozen=True)
 class Metrics:
@@ -21,7 +23,7 @@ class Trainer:
         model: nn.Module,
         learning_rate: float,
         device: torch.device,
-        save_dir: Path,
+        run_dir: Path,
     ):
         self._model: nn.Module = model
         self._device: torch.device = device
@@ -32,7 +34,8 @@ class Trainer:
         self._optimizer: torch.optim.Optimizer = torch.optim.AdamW(
             params=model.parameters(), lr=learning_rate
         )
-        self.save_dir: Path = save_dir
+        self.run_dir: Path = run_dir
+        self.weights: Path = best_weights(run_dir)
 
     @torch.enable_grad()
     def fit(self, train_loader: DataLoader, val_loader: DataLoader, nb_epochs: int):
@@ -78,9 +81,9 @@ class Trainer:
             save = False
 
     def save(self) -> None:
-        """Sauvegarde les poids pour l'inference."""
-        self.save_dir.parent.mkdir(parents=True, exist_ok=True)
-        torch.save(self._model.state_dict(), self.save_dir)
+        """Sauvegarde les poids du run courant pour l'inference."""
+        self.weights.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(self._model.state_dict(), self.weights)
 
     @torch.no_grad()
     def _validate(self, val_loader: DataLoader) -> Metrics:
